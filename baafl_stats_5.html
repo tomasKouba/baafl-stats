@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAAFL Stats — Liga de Football Americano de Buenos Aires</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap');
+
+  :root {
+    --navy:    #0B1A2E;
+    --gold:    #D4A017;
+    --gold-lt: #F0C040;
+    --steel:   #1E3050;
+    --mid:     #2A4468;
+    --muted:   #8A9BB5;
+    --light:   #C8D5E8;
+    --white:   #F2F6FC;
+    --red:     #C0392B;
+    --green:   #27AE60;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--steel);
+    border-bottom: 3px solid var(--gold);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 72px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-mark {
+    width: 48px;
+    height: 48px;
+    background: var(--gold);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--navy);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+
+  .header-text h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .header-text p {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-year {
+    margin-left: auto;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── NAV TABS ── */
+  nav {
+    background: var(--steel);
+    border-bottom: 1px solid var(--mid);
+    display: flex;
+    gap: 0;
+    padding: 0 24px;
+    overflow-x: auto;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+
+  nav button:hover { color: var(--light); }
+  nav button.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ── MAIN LAYOUT ── */
+  main { padding: 28px 24px; max-width: 1400px; margin: 0 auto; }
+
+  /* ── FILTERS BAR ── */
+  .filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  select, input[type="text"] {
+    background: var(--steel);
+    border: 1px solid var(--mid);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  select:focus, input[type="text"]:focus { border-color: var(--gold); }
+
+  input[type="text"] { width: 200px; }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  .filter-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 6px;
+    border: 1px solid var(--mid);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead th {
+    background: var(--mid);
+    color: var(--light);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 2px solid var(--gold);
+    position: relative;
+  }
+
+  thead th:hover { color: var(--gold); }
+
+  thead th.sort-asc::after  { content: ' ▲'; color: var(--gold); font-size: 10px; }
+  thead th.sort-desc::after { content: ' ▼'; color: var(--gold); font-size: 10px; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--mid);
+    transition: background 0.1s;
+  }
+
+  tbody tr:hover { background: var(--steel); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 11px 14px;
+    color: var(--white);
+    white-space: nowrap;
+  }
+
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .td-name {
+    font-weight: 600;
+    color: var(--white);
+  }
+
+  .td-team {
+    display: inline-block;
+    background: var(--mid);
+    color: var(--gold-lt);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  .td-year {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .td-pos {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .pos-campeon  { background: rgba(212,160,23,0.2); color: var(--gold); }
+  .pos-finalista { background: rgba(39,174,96,0.15); color: var(--green); }
+  .pos-semi     { background: rgba(44,82,130,0.4); color: var(--light); }
+  .pos-no       { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+  /* ── LOADING / EMPTY ── */
+  .state-msg {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .state-msg .icon { font-size: 40px; margin-bottom: 12px; }
+  .state-msg h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; color: var(--light); margin-bottom: 6px; }
+  .state-msg p  { font-size: 13px; }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--mid);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── AWARDS GRID ── */
+  .awards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .award-card {
+    background: var(--steel);
+    border: 1px solid var(--mid);
+    border-radius: 6px;
+    padding: 16px 20px;
+  }
+
+  .award-year {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .award-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--mid);
+    font-size: 13px;
+  }
+  .award-row:last-child { border-bottom: none; }
+  .award-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  .award-name  { color: var(--white); font-weight: 600; text-align: right; }
+
+  /* ── HERO STRIP ── */
+  .hero {
+    background: linear-gradient(135deg, var(--steel) 0%, var(--mid) 100%);
+    border: 1px solid var(--mid);
+    border-left: 4px solid var(--gold);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .hero-stat { }
+  .hero-stat .val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .hero-stat .lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── ERROR BANNER ── */
+  .error-banner {
+    background: rgba(192,57,43,0.15);
+    border: 1px solid var(--red);
+    border-radius: 6px;
+    padding: 16px 20px;
+    color: var(--light);
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    main { padding: 16px 12px; }
+    .filters { gap: 8px; }
+    input[type="text"] { width: 140px; }
+    .hero { gap: 20px; }
+    .hero-stat .val { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">FA</div>
+  <div class="header-text">
+    <h1>BAAFL STATS</h1>
+    <p>Buenos Aires American Football League</p>
+  </div>
+  <div class="header-year" id="yearRange">2005 — 2024</div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" data-tab="standings">Standings</button>
+  <button data-tab="passing">Passing</button>
+  <button data-tab="rushing">Rushing</button>
+  <button data-tab="receiving">Receiving</button>
+  <button data-tab="interceptions">Interceptions</button>
+  <button data-tab="tackles">Tackles</button>
+  <button data-tab="sacks">Sacks</button>
+  <button data-tab="awards">Premios</button>
+</nav>
+
+<main>
+  <div class="error-banner" id="errorBanner"></div>
+
+  <div class="hero" id="heroStrip" style="display:none">
+    <div class="hero-stat"><div class="val" id="hTotal">—</div><div class="lbl">Registros</div></div>
+    <div class="hero-stat"><div class="val" id="hYears">—</div><div class="lbl">Temporadas</div></div>
+    <div class="hero-stat"><div class="val" id="hTeams">—</div><div class="lbl">Equipos</div></div>
+    <div class="hero-stat"><div class="val" id="hPlayers">—</div><div class="lbl" id="hPlayersLbl">Jugadores</div></div>
+  </div>
+
+  <div class="filters" id="filtersBar"></div>
+
+  <div id="tableArea">
+    <div class="state-msg">
+      <div class="spinner"></div>
+      <h3>Cargando datos…</h3>
+      <p>Conectando con Google Sheets</p>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────
+const PUBLISHED_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlAhwctcUQg8REBp5r0ygKN6auXv28bnBnalWZRHEOJZeNgbQP81IyyycC2tZo7w/pub';
+
+// GID per tab (from URL when clicking each tab in Google Sheets)
+const GIDS = {
+  standings:     '1200648202',
+  passing:       '552538165',
+  rushing:       '2021166112',
+  receiving:     '247511682',
+  interceptions: '2057537386',
+  tackles:       '513450972',
+  sacks:         '311973475',
+  awards:        '1281353915',
+};
+
+// Sheet names
+const TABS = {
+  standings:     'Standings',
+  passing:       'Passing',
+  rushing:       'Rushing',
+  receiving:     'Receiving',
+  interceptions: 'Interceptions',
+  tackles:       'Tackles',
+  sacks:         'Sacks',
+  awards:        'Premios individuales',
+};
+
+// Column definitions per tab
+const COLS = {
+  standings: [
+    { key: 'Team',     label: 'Equipo',   type: 'name' },
+    { key: 'PJ',       label: 'PJ',       type: 'num' },
+    { key: 'V',        label: 'V',        type: 'num' },
+    { key: 'E',        label: 'E',        type: 'num' },
+    { key: 'D',        label: 'D',        type: 'num' },
+    { key: 'PCT',      label: 'PCT',      type: 'num' },
+    { key: 'TF',       label: 'TF',       type: 'num' },
+    { key: 'TC',       label: 'TC',       type: 'num' },
+    { key: 'DIF',      label: 'DIF',      type: 'num' },
+    { key: 'Position', label: 'Posición', type: 'pos' },
+    { key: 'Year',     label: 'Año',      type: 'year' },
+  ],
+  passing: [
+    { key: 'Name',    label: 'Jugador', type: 'name' },
+    { key: 'Team',    label: 'Equipo',  type: 'team' },
+    { key: 'Year',    label: 'Año',     type: 'year' },
+    { key: 'CP',      label: 'CP',      type: 'num' },
+    { key: 'AT',      label: 'AT',      type: 'num' },
+    { key: '% CPL',   label: '% CPL',   type: 'num' },
+    { key: 'YDS',     label: 'YDS',     type: 'num' },
+    { key: 'AVG',     label: 'AVG',     type: 'num' },
+    { key: 'LNG',     label: 'LNG',     type: 'num' },
+    { key: 'TD',      label: 'TD',      type: 'num' },
+    { key: 'INT',     label: 'INT',     type: 'num' },
+  ],
+  rushing: [
+    { key: 'Name',     label: 'Jugador',  type: 'name' },
+    { key: 'Team',     label: 'Equipo',   type: 'team' },
+    { key: 'Year',     label: 'Año',      type: 'year' },
+    { key: 'Attempts', label: 'ATT',      type: 'num' },
+    { key: 'Yards',    label: 'YDS',      type: 'num' },
+    { key: 'TD',       label: 'TD',       type: 'num' },
+    { key: 'Longest',  label: 'LNG',      type: 'num' },
+  ],
+  receiving: [
+    { key: 'Name',       label: 'Jugador', type: 'name' },
+    { key: 'Team',       label: 'Equipo',  type: 'team' },
+    { key: 'Year',       label: 'Año',     type: 'year' },
+    { key: 'Receptions', label: 'REC',     type: 'num' },
+    { key: 'Yards',      label: 'YDS',     type: 'num' },
+    { key: 'TD',         label: 'TD',      type: 'num' },
+    { key: 'Longest',    label: 'LNG',     type: 'num' },
+  ],
+  interceptions: [
+    { key: 'Name',          label: 'Jugador', type: 'name' },
+    { key: 'Team',          label: 'Equipo',  type: 'team' },
+    { key: 'Year',          label: 'Año',     type: 'year' },
+    { key: 'Interceptions', label: 'INT',     type: 'num' },
+  ],
+  tackles: [
+    { key: 'Name',    label: 'Jugador', type: 'name' },
+    { key: 'Team',    label: 'Equipo',  type: 'team' },
+    { key: 'Year',    label: 'Año',     type: 'year' },
+    { key: 'Tackles', label: 'Tackles', type: 'num' },
+  ],
+  sacks: [
+    { key: 'Name',  label: 'Jugador', type: 'name' },
+    { key: 'Team',  label: 'Equipo',  type: 'team' },
+    { key: 'Year',  label: 'Año',     type: 'year' },
+    { key: 'Sacks', label: 'Sacks',   type: 'num' },
+  ],
+  awards: null, // special render
+};
+
+// ─── STATE ────────────────────────────────────────────────────
+let state = {
+  tab: 'standings',
+  cache: {},
+  sortCol: null,
+  sortDir: 'desc',
+  filterYear: 'all',
+  filterTeam: 'all',
+  searchText: '',
+};
+
+// ─── FETCH ────────────────────────────────────────────────────
+function csvUrl(tab) {
+  const gid = GIDS[tab];
+  if (gid) return `${PUBLISHED_BASE}?output=csv&gid=${gid}`;
+  return `${PUBLISHED_BASE}?output=csv&sheet=${encodeURIComponent(TABS[tab])}`;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = parseCSVLine(lines[0]);
+  return lines.slice(1).map(l => {
+    const vals = parseCSVLine(l);
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = vals[i] ?? ''; });
+    return obj;
+  });
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (c === ',' && !inQ) {
+      result.push(cur.trim()); cur = '';
+    } else cur += c;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function isFormula(v) { return typeof v === 'string' && v.startsWith('='); }
+
+function cleanNum(v) {
+  if (isFormula(v)) return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function cleanRow(row, tab) {
+  // For numeric columns, clean formula cells
+  const numKeys = {
+    standings: ['PJ','V','E','D','TF','TC','DIF'],
+    passing: ['CP','AT','YDS','TD','INT','LNG'],
+    rushing: ['Attempts','Yards','TD','Longest'],
+    receiving: ['Receptions','Yards','TD','Longest'],
+    interceptions: ['Interceptions'],
+    tackles: ['Tackles'],
+    sacks: ['Sacks'],
+  };
+  const keys = numKeys[tab] || [];
+  const clean = {...row};
+  keys.forEach(k => { if (k in clean) clean[k] = cleanNum(clean[k]); });
+  // Year
+  if ('Year' in clean) clean['Year'] = cleanNum(clean['Year']);
+  return clean;
+}
+
+async function fetchTab(tab) {
+  if (state.cache[tab]) return state.cache[tab];
+  const url = csvUrl(tab);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  let rows = parseCSV(text).map(r => cleanRow(r, tab));
+  // filter out rows with no meaningful data
+  rows = rows.filter(r => Object.values(r).some(v => v !== '' && v !== null));
+  state.cache[tab] = rows;
+  return rows;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────
+function posClass(pos) {
+  if (!pos) return 'pos-no';
+  const p = pos.toLowerCase();
+  if (p.includes('campeón') || p.includes('campeon')) return 'pos-campeon';
+  if (p.includes('finalista')) return 'pos-finalista';
+  if (p.includes('semi')) return 'pos-semi';
+  return 'pos-no';
+}
+
+function fmtNum(v) {
+  if (v === null || v === undefined || v === '') return '—';
+  const n = parseFloat(v);
+  if (isNaN(n)) return '—';
+  return Number.isInteger(n) ? n.toString() : n.toFixed(1);
+}
+
+function renderCell(col, val) {
+  if (val === null || val === undefined || val === '') {
+    return col.type === 'num' ? `<td class="num">—</td>` : `<td>—</td>`;
+  }
+  switch (col.type) {
+    case 'name': return `<td class="td-name">${val}</td>`;
+    case 'team': return `<td><span class="td-team">${val}</span></td>`;
+    case 'year': return `<td class="td-year num">${fmtNum(val)}</td>`;
+    case 'num':  return `<td class="num">${fmtNum(val)}</td>`;
+    case 'pos':  return `<td><span class="td-pos ${posClass(val)}">${val}</span></td>`;
+    default:     return `<td>${val}</td>`;
+  }
+}
+
+function applyFilters(rows) {
+  let r = rows;
+  if (state.filterYear !== 'all')
+    r = r.filter(row => String(Math.round(row.Year)) === state.filterYear);
+  if (state.filterTeam !== 'all')
+    r = r.filter(row => (row.Team || '') === state.filterTeam);
+  if (state.searchText) {
+    const q = state.searchText.toLowerCase();
+    r = r.filter(row =>
+      Object.values(row).some(v => String(v).toLowerCase().includes(q))
+    );
+  }
+  return r;
+}
+
+function applySort(rows, cols) {
+  if (!state.sortCol) return rows;
+  const col = cols.find(c => c.key === state.sortCol);
+  if (!col) return rows;
+  return [...rows].sort((a, b) => {
+    let av = a[state.sortCol], bv = b[state.sortCol];
+    if (col.type === 'num' || col.type === 'year') {
+      av = parseFloat(av) || 0;
+      bv = parseFloat(bv) || 0;
+    } else {
+      av = String(av || '').toLowerCase();
+      bv = String(bv || '').toLowerCase();
+    }
+    if (av < bv) return state.sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return state.sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+function buildFilters(rows, cols, tab) {
+  const bar = document.getElementById('filtersBar');
+
+  const years = [...new Set(rows.map(r => Math.round(r.Year)).filter(Boolean))].sort();
+  const teams = tab === 'standings'
+    ? [...new Set(rows.map(r => r.Team).filter(Boolean))].sort()
+    : [...new Set(rows.map(r => r.Team).filter(Boolean))].sort();
+
+  let html = `<span class="filter-label">Filtrar:</span>`;
+
+  // Year select
+  html += `<select id="fYear"><option value="all">Todos los años</option>`;
+  years.forEach(y => {
+    html += `<option value="${y}" ${state.filterYear === String(y) ? 'selected' : ''}>${y}</option>`;
+  });
+  html += `</select>`;
+
+  // Team select
+  html += `<select id="fTeam"><option value="all">Todos los equipos</option>`;
+  teams.forEach(t => {
+    html += `<option value="${t}" ${state.filterTeam === t ? 'selected' : ''}>${t}</option>`;
+  });
+  html += `</select>`;
+
+  // Search
+  if (tab !== 'standings') {
+    html += `<input type="text" id="fSearch" placeholder="Buscar jugador…" value="${state.searchText}">`;
+  }
+
+  bar.innerHTML = html;
+
+  // Count
+  const countSpan = document.createElement('span');
+  countSpan.className = 'filter-count';
+  countSpan.id = 'fCount';
+  bar.appendChild(countSpan);
+
+  // Events
+  document.getElementById('fYear').addEventListener('change', e => {
+    state.filterYear = e.target.value;
+    renderTable(rows, cols, tab);
+  });
+  document.getElementById('fTeam').addEventListener('change', e => {
+    state.filterTeam = e.target.value;
+    renderTable(rows, cols, tab);
+  });
+  if (tab !== 'standings') {
+    document.getElementById('fSearch').addEventListener('input', e => {
+      state.searchText = e.target.value;
+      renderTable(rows, cols, tab);
+    });
+  }
+}
+
+function renderTable(rows, cols, tab) {
+  const filtered = applyFilters(rows);
+  const sorted   = applySort(filtered, cols);
+
+  // update count
+  const fc = document.getElementById('fCount');
+  if (fc) fc.textContent = `${sorted.length} registros`;
+
+  // headers
+  const ths = cols.map(c => {
+    let cls = '';
+    if (state.sortCol === c.key) cls = state.sortDir === 'asc' ? 'sort-asc' : 'sort-desc';
+    return `<th class="${cls}" data-key="${c.key}">${c.label}</th>`;
+  }).join('');
+
+  // rows
+  const trs = sorted.length === 0
+    ? `<tr><td colspan="${cols.length}" style="text-align:center;padding:40px;color:var(--muted)">Sin resultados</td></tr>`
+    : sorted.map(row =>
+        `<tr>${cols.map(c => renderCell(c, row[c.key])).join('')}</tr>`
+      ).join('');
+
+  document.getElementById('tableArea').innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${ths}</tr></thead>
+        <tbody>${trs}</tbody>
+      </table>
+    </div>`;
+
+  // sort click
+  document.querySelectorAll('thead th[data-key]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (state.sortCol === key) {
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortCol = key;
+        state.sortDir = 'desc';
+      }
+      renderTable(rows, cols, tab);
+    });
+  });
+}
+
+function updateHero(rows, tab) {
+  const strip = document.getElementById('heroStrip');
+  if (tab === 'awards') { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+
+  const years   = [...new Set(rows.map(r => r.Year).filter(Boolean))];
+  const teams   = [...new Set(rows.map(r => r.Team).filter(Boolean))];
+  const players = tab !== 'standings' ? [...new Set(rows.map(r => r.Name).filter(Boolean))] : [];
+
+  document.getElementById('hTotal').textContent   = rows.length.toLocaleString('es-AR');
+  document.getElementById('hYears').textContent   = years.length;
+  document.getElementById('hTeams').textContent   = teams.length;
+  document.getElementById('hPlayers').textContent = tab !== 'standings' ? players.length : '—';
+  document.getElementById('hPlayersLbl').textContent = tab !== 'standings' ? 'Jugadores únicos' : '';
+
+  const yearNums = years.map(y => Math.round(y)).filter(Boolean).sort();
+  if (yearNums.length) {
+    document.getElementById('yearRange').textContent =
+      `${yearNums[0]} — ${yearNums[yearNums.length-1]}`;
+  }
+}
+
+// ─── AWARDS ───────────────────────────────────────────────────
+function renderAwards(rows) {
+  document.getElementById('heroStrip').style.display = 'none';
+  document.getElementById('filtersBar').innerHTML = '';
+
+  const valid = rows.filter(r => r['Año'] && (r['MVP'] || r['Ofensivo'] || r['Defensivo'] || r['Rookie']));
+  valid.sort((a,b) => parseFloat(b['Año']) - parseFloat(a['Año']));
+
+  if (!valid.length) {
+    document.getElementById('tableArea').innerHTML = `
+      <div class="state-msg"><div class="icon">🏆</div><h3>Sin datos</h3><p>No se encontraron premios</p></div>`;
+    return;
+  }
+
+  const cards = valid.map(r => `
+    <div class="award-card">
+      <div class="award-year">${Math.round(r['Año'])}</div>
+      ${r['MVP']       ? `<div class="award-row"><span class="award-label">MVP</span><span class="award-name">${r['MVP']}</span></div>` : ''}
+      ${r['Ofensivo']  ? `<div class="award-row"><span class="award-label">Mejor Ofensivo</span><span class="award-name">${r['Ofensivo']}</span></div>` : ''}
+      ${r['Defensivo'] ? `<div class="award-row"><span class="award-label">Mejor Defensivo</span><span class="award-name">${r['Defensivo']}</span></div>` : ''}
+      ${r['Rookie']    ? `<div class="award-row"><span class="award-label">Mejor Rookie</span><span class="award-name">${r['Rookie']}</span></div>` : ''}
+    </div>`).join('');
+
+  document.getElementById('tableArea').innerHTML = `<div class="awards-grid">${cards}</div>`;
+}
+
+// ─── LOAD TAB ─────────────────────────────────────────────────
+async function loadTab(tab) {
+  state.tab = tab;
+  state.sortCol = null;
+  state.sortDir = 'desc';
+  state.filterYear = 'all';
+  state.filterTeam = 'all';
+  state.searchText = '';
+
+  // nav active
+  document.querySelectorAll('nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+
+  document.getElementById('tableArea').innerHTML = `
+    <div class="state-msg">
+      <div class="spinner"></div>
+      <h3>Cargando ${TABS[tab]}…</h3>
+      <p>Conectando con Google Sheets</p>
+    </div>`;
+  document.getElementById('filtersBar').innerHTML = '';
+  document.getElementById('heroStrip').style.display = 'none';
+  document.getElementById('errorBanner').style.display = 'none';
+
+  try {
+    const rows = await fetchTab(tab);
+
+    if (tab === 'awards') {
+      renderAwards(rows);
+      return;
+    }
+
+    const cols = COLS[tab];
+    // default sort: year desc, then first num col desc
+    state.sortCol = 'Year';
+    state.sortDir = 'desc';
+
+    updateHero(rows, tab);
+    buildFilters(rows, cols, tab);
+    renderTable(rows, cols, tab);
+
+  } catch (err) {
+    console.error(err);
+    const banner = document.getElementById('errorBanner');
+    banner.style.display = 'block';
+    banner.innerHTML = `
+      <strong>⚠️ No se pudieron cargar los datos.</strong><br>
+      Verificá que el Google Sheet esté publicado con acceso público (Archivo → Compartir → Publicar en la web).<br>
+      <small style="color:var(--muted)">${err.message}</small>`;
+    document.getElementById('tableArea').innerHTML = `
+      <div class="state-msg">
+        <div class="icon">🔌</div>
+        <h3>Error de conexión</h3>
+        <p>Revisá el banner de arriba para más detalles.</p>
+      </div>`;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => loadTab(btn.dataset.tab));
+});
+
+loadTab('standings');
+</script>
+</body>
+</html>
